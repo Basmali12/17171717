@@ -13,177 +13,179 @@
     <div id="loginModal" class="modal-overlay">
         <div class="modal-content">
             <div class="logo-area">💎</div>
-            <h2>أهلاً بك في كي للاستثمار</h2>
-            <p>يرجى تسجيل الدخول للبدء</p>
-            <input type="text" id="regName" placeholder="الاسم الكامل">
-            <input type="password" id="regPass" placeholder="كلمة المرور">
-            <button onclick="registerUser()">تسجيل الدخول / إنشاء حساب</button>
-        </div>
-    </div>
-
-    <div class="news-ticker">
-        <div class="ticker-content">
-            📢 قام المستخدم (علي...) بسحب 50,000 IQD الآن | 📢 قام (محمد...) بشراء العداد الشهري | 🚀 عرض خاص لفترة محدودة!
+            <h2>تسجيل الدخول</h2>
+            <p>مرحباً بك في نظام كي للاستثمار</p>
+            <input type="text" id="regName" placeholder="الاسم الثلاثي">
+            <input type="text" id="regPhone" placeholder="رقم الهاتف">
+            <button onclick="registerUser()">إنشاء حساب جديد</button>
         </div>
     </div>
 
     <div class="app-header">
         <div class="user-info-header">
-            <i class="fas fa-user-circle"></i>
-            <span id="headerName">ضيف</span>
+            <div class="avatar-circle"><i class="fas fa-user"></i></div>
+            <div>
+                <span id="headerName" style="font-weight:bold;">ضيف</span>
+                <span style="font-size:0.7rem; display:block; opacity:0.8;">ID: <span id="userId">---</span></span>
+            </div>
         </div>
-        <button id="downloadBtn" onclick="alert('قريباً...')">
-            تحميل التطبيق <i class="fas fa-download"></i>
-        </button>
+        <div class="header-actions">
+            <i class="fas fa-bell"></i>
+        </div>
     </div>
 
     <main class="content-area">
         
         <section id="home" class="tab-content active">
             <div class="balance-card gsap-fade">
-                <h3>رصيد المحفظة</h3>
+                <h3>رأس المال + الأرباح المتاحة</h3>
                 <h1 id="walletBalance">0 IQD</h1>
-                <div class="mini-stats">
-                    <span><i class="fas fa-chart-line"></i> ربح اليوم: <span id="dailyProfit">0</span></span>
-                </div>
-                <button onclick="claimDailyBonus()" class="bonus-btn pulse-anim">🎁 المكافأة اليومية</button>
+                <div class="status-badge">حالة الحساب: <span id="accStatus">نشط</span></div>
             </div>
 
             <div class="plans-container">
-                <h2 class="section-head">باقات الاستثمار (اضغط للقلب)</h2>
+                <h2 class="section-head">باقات الاستثمار (مدة 4 أشهر)</h2>
+                <p class="subtitle-text">أرباحك كعضو: 50% | التفعيل: يدوي من الأدمن</p>
                 
-                <div class="flip-card-container gsap-card" onclick="flipCard(this)">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">
-                            <div class="icon-box"><i class="fas fa-bolt"></i></div>
-                            <h3>العداد الأسبوعي</h3>
-                            <p class="price">25,000 IQD</p>
-                            <span class="hint">اضغط للتفاصيل</span>
-                        </div>
-                        <div class="flip-card-back">
-                            <h3>تفاصيل الباقة</h3>
-                            <p>الربح اليومي: 1,000 IQD</p>
-                            <p>المدة: 7 أيام</p>
-                            <p>إجمالي الربح: 7,000 IQD</p>
-                            <button onclick="buyPlan(event, 'weekly', 25000, 1000, 7)">تفعيل الآن</button>
-                        </div>
+                <div class="plan-box gsap-card">
+                    <div class="plan-header">
+                        <i class="fas fa-coins"></i>
+                        <h3>باقة المبتدئ</h3>
                     </div>
+                    <div class="plan-details">
+                        <p>سعر الاشتراك: <strong>100,000 IQD</strong></p>
+                        <p>الربح المتوقع: حسب السوق (50%)</p>
+                        <p>المدة: <strong>4 أشهر (ثابتة)</strong></p>
+                    </div>
+                    <button onclick="requestPlan('starter', 100000)">طلب اشتراك (مراجعة الأدمن)</button>
                 </div>
 
-                <div class="flip-card-container gsap-card" onclick="flipCard(this)">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front featured-front">
-                            <div class="badge">الأقوى</div>
-                            <div class="icon-box"><i class="fas fa-gem"></i></div>
-                            <h3>العداد الشهري</h3>
-                            <p class="price">100,000 IQD</p>
-                            <span class="hint">اضغط للتفاصيل</span>
-                        </div>
-                        <div class="flip-card-back featured-back">
-                            <h3>تفاصيل الباقة</h3>
-                            <p>الربح اليومي: 5,000 IQD</p>
-                            <p>المدة: 30 يوم</p>
-                            <p>إجمالي الربح: 150,000 IQD</p>
-                            <button onclick="buyPlan(event, 'monthly', 100000, 5000, 30)">تفعيل الآن</button>
-                        </div>
+                <div class="plan-box gsap-card featured-plan">
+                    <div class="badge">الأكثر طلباً</div>
+                    <div class="plan-header">
+                        <i class="fas fa-gem"></i>
+                        <h3>باقة المحترف</h3>
                     </div>
+                    <div class="plan-details">
+                        <p>سعر الاشتراك: <strong>500,000 IQD</strong></p>
+                        <p>الربح المتوقع: نسبة ممتازة (50%)</p>
+                        <p>المدة: <strong>4 أشهر (ثابتة)</strong></p>
+                    </div>
+                    <button onclick="requestPlan('pro', 500000)">طلب اشتراك (مراجعة الأدمن)</button>
                 </div>
 
-                 <div class="flip-card-container gsap-card" onclick="flipCard(this)">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">
-                            <div class="icon-box"><i class="fas fa-crown"></i></div>
-                            <h3>العداد الذهبي</h3>
-                            <p class="price">500,000 IQD</p>
-                            <span class="hint">اضغط للتفاصيل</span>
-                        </div>
-                        <div class="flip-card-back">
-                            <h3>تفاصيل الباقة</h3>
-                            <p>الربح اليومي: 30,000 IQD</p>
-                            <p>المدة: 90 يوم</p>
-                            <button onclick="buyPlan(event, 'quarterly', 500000, 30000, 90)">تفعيل الآن</button>
-                        </div>
+                <div class="plan-box gsap-card">
+                    <div class="plan-header">
+                        <i class="fas fa-crown"></i>
+                        <h3>باقة الـ VIP</h3>
                     </div>
+                    <div class="plan-details">
+                        <p>سعر الاشتراك: <strong>1,000,000 IQD</strong></p>
+                        <p>الربح المتوقع: أعلى عائد (50%)</p>
+                        <p>المدة: <strong>4 أشهر (ثابتة)</strong></p>
+                    </div>
+                    <button onclick="requestPlan('vip', 1000000)">طلب اشتراك (مراجعة الأدمن)</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="store" class="tab-content">
+            <div class="section-title">المتجر الرقمي</div>
+            <div class="store-warning">
+                <i class="fas fa-tools"></i> المتجر حالياً تحت الصيانة - قريباً الافتتاح
+            </div>
+
+            <div class="store-grid">
+                <div class="store-item gsap-card">
+                    <div class="store-img asia">AsiaCell</div>
+                    <h4>رصيد آسيا 10$</h4>
+                    <p class="price">15,000 IQD</p>
+                    <button disabled>قريباً</button>
+                </div>
+
+                <div class="store-item gsap-card">
+                    <div class="store-img zain">Zain</div>
+                    <h4>رصيد زين 10$</h4>
+                    <p class="price">15,000 IQD</p>
+                    <button disabled>قريباً</button>
+                </div>
+
+                <div class="store-item gsap-card">
+                    <div class="store-img pubg">PUBG</div>
+                    <h4>شدات بوبجي (360)</h4>
+                    <p class="price">7,500 IQD</p>
+                    <button disabled>قريباً</button>
+                </div>
+
+                <div class="store-item gsap-card">
+                    <div class="store-img ludo">Ludo</div>
+                    <h4>مجوهوات لودو</h4>
+                    <p class="price">5,000 IQD</p>
+                    <button disabled>قريباً</button>
                 </div>
             </div>
         </section>
 
         <section id="team" class="tab-content">
             <div class="section-title">فريقي</div>
-            <div class="team-header">
-                <div class="stat">
-                    <span>عدد الفريق</span>
-                    <h3 id="teamCount">0</h3>
-                </div>
-                <div class="stat">
-                    <span>أرباح الإحالة</span>
-                    <h3 id="referralEarnings">0</h3>
-                </div>
-            </div>
             
-            <div class="invite-box gsap-fade">
-                <p>كود الدعوة الخاص بك</p>
-                <div class="code-display" id="myInviteCode">LOADING...</div>
-                <p class="small-text">شارك الكود واربح 2,500 دينار لكل شخص يودع 100 ألف.</p>
+            <div class="team-rules-card">
+                <h4><i class="fas fa-info-circle"></i> نظام الفريق</h4>
+                <ul>
+                    <li>أنت الآن في مستوى: <strong>عضو</strong></li>
+                    <li>نسبة أرباحك: <strong>50%</strong> من الباقة.</li>
+                    <li>رئيس فريقك: <strong>Admin_Leader</strong></li>
+                    <li>يتم احتساب الأرباح شهرياً.</li>
+                </ul>
             </div>
 
-            <div class="team-list-container">
-                <h4>الأعضاء (Max 10)</h4>
-                <button onclick="addTeamMember()" class="action-btn-small">إضافة عضو +</button>
-                <ul id="teamMembersList"></ul>
+            <div class="invite-box disabled-look">
+                <p>رابط الدعوة (متاح لرؤساء الفرق فقط)</p>
+                <div class="code-display">--- مغلق للعضو ---</div>
+                <p class="small-text">فقط رؤساء الفرق (الـ 5 المعتمدين) يملكون صلاحية الإضافة.</p>
+            </div>
+        </section>
+
+        <section id="agents" class="tab-content">
+            <div class="coming-soon-container">
+                <i class="fas fa-map-marked-alt icon-big"></i>
+                <h2>قسم الوكلاء</h2>
+                <p>سيتم إضافة قائمة الوكلاء المعتمدين قريباً لتسهيل عمليات الإيداع والسحب النقدي.</p>
+                <span class="badge-soon">Coming Soon</span>
             </div>
         </section>
 
         <section id="profile" class="tab-content">
-            <div class="profile-header gsap-fade">
-                <div class="avatar">👤</div>
-                <h2 id="profileName">اسم المستخدم</h2>
-                <p id="profileCode">Code: ---</p>
-            </div>
-
-            <div class="profile-menu">
-                <div class="menu-item" onclick="toggleHistory()">
-                    <i class="fas fa-history"></i> سجل المعاملات المالية
+            <div class="section-title">لوحة التحكم</div>
+            
+            <div class="dashboard-stats">
+                <div class="d-stat">
+                    <span>الاشتراكات الفعالة</span>
+                    <strong id="activePlansCount">0</strong>
                 </div>
-                <div id="historySection" class="history-hidden">
-                    <ul id="transactionList">
-                        </ul>
-                </div>
-
-                <div class="menu-item" onclick="simulateDeposit()">
-                    <i class="fas fa-plus-circle"></i> شحن المحفظة (تجريبي)
-                </div>
-                
-                <div class="menu-item" onclick="switchTab('withdraw_sec')">
-                    <i class="fas fa-money-bill-wave"></i> سحب الأرباح
-                </div>
-
-                <div class="menu-item danger" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                <div class="d-stat">
+                    <span>قيد المراجعة</span>
+                    <strong id="pendingPlansCount" style="color:orange">0</strong>
                 </div>
             </div>
-        </section>
 
-        <section id="withdraw_sec" class="tab-content">
-             <div class="section-title">سحب الأرباح</div>
-             <div class="withdraw-box">
-                <label>طريقة السحب</label>
-                <div class="methods">
-                    <div class="method active"><i class="fas fa-mobile-alt"></i> زين كاش</div>
-                    <div class="method"><i class="fab fa-cc-mastercard"></i> ماستر كارد</div>
-                </div>
-                <input type="number" id="wAmount" placeholder="المبلغ">
-                <input type="text" id="wPhone" placeholder="رقم المحفظة">
-                <button onclick="processWithdraw()" class="confirm-btn">تأكيد الطلب</button>
-             </div>
+            <div class="requests-list">
+                <h3>سجل اشتراكاتي</h3>
+                <ul id="myPlansList">
+                    </ul>
+            </div>
+
+            <div class="menu-item logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </div>
         </section>
 
     </main>
 
     <nav class="bottom-nav">
         <div class="nav-item" onclick="switchTab('profile')">
-            <i class="fas fa-user"></i>
-            <span>حسابي</span>
+            <i class="fas fa-user-clock"></i>
+            <span>طلباتي</span>
         </div>
         <div class="nav-item" onclick="switchTab('team')">
             <i class="fas fa-users"></i>
@@ -194,20 +196,15 @@
                 <i class="fas fa-home"></i>
             </div>
         </div>
+        <div class="nav-item" onclick="switchTab('store')">
+            <i class="fas fa-shopping-cart"></i>
+            <span>المتجر</span>
+        </div>
         <div class="nav-item" onclick="switchTab('agents')">
-            <i class="fas fa-store"></i>
+            <i class="fas fa-map-marker-alt"></i>
             <span>الوكلاء</span>
         </div>
-        <div class="nav-item" onclick="switchTab('withdraw_sec')">
-            <i class="fas fa-wallet"></i>
-            <span>السحب</span>
-        </div>
     </nav>
-    
-    <section id="agents" class="tab-content" style="display:none;">
-        <div class="section-title">الوكلاء</div>
-        <div class="agent-item">وكيل بغداد - المنصور</div>
-    </section>
 
     <script src="script.js"></script>
 </body>
