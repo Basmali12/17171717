@@ -3,347 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كي للاستثمار | Key Invest VIP</title>
+    <title>كي للاستثمار | Key Invest</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&display=swap');
-
-        :root {
-            --primary: #4a148c;
-            --accent: #ff6f00;
-            --bg: #f8f9fa;
-            --text: #333;
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: var(--bg);
-            margin: 0;
-            padding-bottom: 100px; /* مسافة للأزرار السفلية */
-            color: var(--text);
-            overflow-x: hidden;
-        }
-
-        /* أهم كود لحل مشكلتك: إخفاء التبويبات */
-        .tab-content {
-            display: none !important; /* إجبار الإخفاء */
-            animation: fadeIn 0.5s;
-        }
-
-        /* إظهار التبويب النشط فقط */
-        .tab-content.active {
-            display: block !important; /* إجبار الإظهار */
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* الهيدر */
-        .app-header {
-            background: linear-gradient(to right, var(--primary), #7c43bd);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            border-radius: 0 0 25px 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 10;
-        }
-        .avatar-circle {
-            width: 40px; height: 40px; background: rgba(255,255,255,0.2);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-left: 10px;
-        }
-        .user-info-header { display: flex; align-items: center; gap: 10px; }
-
-        /* البطاقات */
-        .balance-card {
-            background: linear-gradient(135deg, #2c3e50, #000);
-            color: white; padding: 25px; border-radius: 20px;
-            text-align: center; margin: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .plans-container, .requests-list { padding: 0 20px; }
-        
-        .plan-box {
-            background: white; border-radius: 15px; padding: 20px;
-            margin-bottom: 20px; border: 1px solid #eee;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        .plan-box.featured-plan { border: 2px solid var(--accent); }
-        
-        .plan-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .plan-header i { font-size: 1.5rem; color: var(--primary); }
-        
-        button {
-            background: var(--primary); color: white; border: none;
-            width: 100%; padding: 12px; border-radius: 10px; margin-top: 15px;
-            font-family: inherit; cursor: pointer;
-        }
-        button:disabled { background: #ccc; }
-
-        /* المتجر */
-        .store-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; }
-        .store-item { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
-        .store-img { height: 80px; width: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 10px; }
-        .store-img.asia { background: #d32f2f; }
-        .store-img.zain { background: #000; }
-        .store-img.pubg { background: #ff9800; }
-        .store-img.ludo { background: purple; }
-
-        /* شريط التنقل السفلي - حل مشكلة عدم الضغط */
-        .bottom-nav {
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            background: white;
-            display: flex; 
-            justify-content: space-around; 
-            padding: 10px 0;
-            box-shadow: 0 -5px 10px rgba(0,0,0,0.05); 
-            z-index: 9999; /* رقم عالي جداً لضمان أنه فوق كل شيء */
-        }
-        .nav-item { text-align: center; color: #bbb; cursor: pointer; flex: 1; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 1.3rem; margin-bottom: 3px; display: block; }
-        .floating-home {
-            background: var(--primary); width: 55px; height: 55px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; color: white;
-            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-            box-shadow: 0 5px 10px rgba(74, 20, 140, 0.4); border: 4px solid var(--bg);
-        }
-
-        /* المودال */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 10000; display: none; /* مخفي افتراضياً */
-            justify-content: center; align-items: center;
-        }
-        .modal-content { background: white; padding: 30px; width: 85%; border-radius: 20px; text-align: center; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* حالات الطلب */
-        .req-item { padding: 15px; background: white; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; border-right: 4px solid #ddd; }
-        .req-item.pending { border-right-color: orange; }
-        .req-item.active { border-right-color: green; }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-content">
-            <div style="font-size:3rem;">💎</div>
-            <h2>تسجيل الدخول</h2>
-            <input type="text" id="regName" placeholder="الاسم">
-            <input type="text" id="regPhone" placeholder="الهاتف">
-            <button onclick="registerUser()">دخول</button>
+    <div id="intro-overlay">
+        <h1 class="ml11">
+            <span class="text-wrapper">
+                <span class="line line1"></span>
+                <span class="letters">KEY INVEST</span>
+            </span>
+        </h1>
+    </div>
+
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div id="authModal" class="glass-modal">
+        <div class="modal-content glass-card">
+            <div class="logo-area">💎</div>
+            <h2>مرحباً بك في كي للاستثمار</h2>
+            <p>سجل الدخول لبدء جني الأرباح</p>
+            
+            <button id="googleLoginBtn" class="btn-primary">
+                <i class="fab fa-google"></i> تسجيل عبر Google
+            </button>
+            
+            <button onclick="startGuestMode()" class="btn-secondary">
+                تخطي للمعاينة <i class="fas fa-eye"></i>
+            </button>
         </div>
     </div>
 
-    <div class="app-header">
-        <div class="user-info-header">
-            <div class="avatar-circle"><i class="fas fa-user"></i></div>
+    <header class="app-header glass-card">
+        <div class="user-info">
+            <div class="avatar"><i class="fas fa-user"></i></div>
             <div>
-                <span id="headerName" style="font-weight:bold;">ضيف</span>
-                <span style="font-size:0.7rem; display:block; opacity:0.8;">ID: <span id="userId">---</span></span>
+                <h3 id="userName">ضيف</h3>
+                <span class="user-id">ID: <span id="userId">---</span></span>
             </div>
         </div>
-    </div>
+        <div class="header-actions">
+            <i class="fas fa-bell"></i>
+        </div>
+    </header>
 
     <main class="content-area">
-        
-        <section id="home" class="tab-content active">
-            <div class="balance-card">
-                <h3>الأرباح المتاحة</h3>
-                <h1 id="walletBalance">0 IQD</h1>
-            </div>
 
-            <div class="plans-container">
-                <h2 style="color:var(--primary)">باقات الاستثمار</h2>
-                <div class="plan-box">
-                    <div class="plan-header"><i class="fas fa-coins"></i><h3>باقة 100,000</h3></div>
-                    <button onclick="requestPlan('starter', 100000)">طلب اشتراك</button>
-                </div>
-                <div class="plan-box featured-plan">
-                    <div class="plan-header"><i class="fas fa-gem"></i><h3>باقة 500,000</h3></div>
-                    <button onclick="requestPlan('pro', 500000)">طلب اشتراك</button>
-                </div>
-                <div class="plan-box">
-                    <div class="plan-header"><i class="fas fa-crown"></i><h3>باقة 1,000,000</h3></div>
-                    <button onclick="requestPlan('vip', 1000000)">طلب اشتراك</button>
+        <section id="news" class="tab-content active">
+            <div class="glass-card news-card">
+                <h2>📰 آخر الأخبار</h2>
+                <div class="coming-soon">
+                    <i class="fas fa-satellite-dish"></i>
+                    <p>نظام الأخبار قريباً...</p>
                 </div>
             </div>
         </section>
 
-        <section id="store" class="tab-content">
-            <div style="text-align:center; padding:20px;">
-                <h2>المتجر</h2>
-                <div class="store-grid">
-                    <div class="store-item"><div class="store-img asia">AsiaCell</div><button disabled>قريباً</button></div>
-                    <div class="store-item"><div class="store-img zain">Zain</div><button disabled>قريباً</button></div>
-                    <div class="store-item"><div class="store-img pubg">PUBG</div><button disabled>قريباً</button></div>
-                    <div class="store-item"><div class="store-img ludo">Ludo</div><button disabled>قريباً</button></div>
+        <section id="wallet" class="tab-content">
+            <div class="glass-card balance-card">
+                <p>الرصيد الكلي</p>
+                <h1 id="totalBalance">0 IQD</h1>
+                <div class="wallet-actions">
+                    <button onclick="handleAction('deposit')" class="action-btn deposit">
+                        <i class="fas fa-arrow-down"></i> إيداع
+                    </button>
+                    <button onclick="handleAction('withdraw')" class="action-btn withdraw">
+                        <i class="fas fa-arrow-up"></i> سحب
+                    </button>
                 </div>
+            </div>
+
+            <div class="glass-card history-section">
+                <h3>سجل السحوبات الأخيرة</h3>
+                <ul id="withdrawalHistory" class="history-list">
+                    </ul>
+            </div>
+        </section>
+
+        <section id="invest" class="tab-content">
+            <h2 class="section-title">باقات الاستثمار</h2>
+            <div class="plans-container">
+                <div class="glass-card plan-card">
+                    <div class="plan-icon"><i class="fas fa-cube"></i></div>
+                    <h3>الباقة الأساسية</h3>
+                    <div class="price">100,000 IQD</div>
+                    <ul class="features">
+                        <li>ربح يومي: 1,250 IQD</li>
+                        <li>مدة العقد: 4 أشهر</li>
+                    </ul>
+                    <button onclick="buyPlan('starter', 100000, 1250)" class="btn-buy">شراء الباقة</button>
+                </div>
+                <div class="glass-card plan-card featured">
+                    <div class="badge">الأكثر طلباً</div>
+                    <div class="plan-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>الباقة الذهبية</h3>
+                    <div class="price">500,000 IQD</div>
+                    <ul class="features">
+                        <li>ربح يومي: 6,250 IQD</li>
+                        <li>مدة العقد: 4 أشهر</li>
+                    </ul>
+                    <button onclick="buyPlan('gold', 500000, 6250)" class="btn-buy">شراء الباقة</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="my-timers" class="tab-content">
+            <h2 class="section-title">استثماراتي النشطة</h2>
+            <div id="activeTimersList" class="timers-container">
+                <p style="text-align:center; color:#eee;">لا توجد باقات نشطة حالياً</p>
             </div>
         </section>
 
         <section id="team" class="tab-content">
-            <div style="padding:20px;">
-                <h2>فريقي</h2>
-                <div class="plan-box">
-                    <p>مستواك: <strong>عضو</strong></p>
-                    <p>نسبة الأرباح: <strong>50%</strong></p>
+            <div class="glass-card team-rules">
+                <h3>👑 نظام القائد</h3>
+                <div class="referral-img-desc">
+                    <p>✅ يكتسب القائد <strong>5%</strong> من كل عضو.</p>
+                    <p>✅ العدد الأقصى للفريق: <strong>10 أعضاء</strong>.</p>
+                    <p>✅ الربح ساري لمدة <strong>4 أشهر</strong>.</p>
                     <hr>
-                    <p style="text-align:center; color:#999;">رابط الدعوة خاص برؤساء الفرق فقط</p>
+                    <p class="example">مثال: 10 أعضاء × 5,000 ربح = <strong>50,000 IQD</strong> للقائد.</p>
                 </div>
             </div>
-        </section>
-
-        <section id="agents" class="tab-content">
-            <div style="text-align:center; padding:50px 20px;">
-                <i class="fas fa-map-marked-alt" style="font-size:4rem; color:#ddd;"></i>
-                <h2>قريباً.. الوكلاء</h2>
-                <p>قائمة الوكلاء المعتمدين قيد التجهيز</p>
+            
+            <div class="glass-card">
+                <h3>رابط الدعوة الخاص بك</h3>
+                <div class="copy-box">
+                    <input type="text" value="https://key-invest.app/?ref=USERID" disabled id="refLink">
+                    <button onclick="handleAction('copy')">نسخ</button>
+                </div>
             </div>
         </section>
 
         <section id="profile" class="tab-content">
-            <div style="padding:20px;">
-                <h2>لوحة التحكم</h2>
-                <div class="requests-list">
-                    <h3>سجل طلباتي</h3>
-                    <ul id="myPlansList" style="list-style:none; padding:0;"></ul>
+            <div class="glass-card profile-header">
+                <div class="big-avatar"><i class="fas fa-user-circle"></i></div>
+                <h2 id="profileName">اسم المستخدم</h2>
+                <button onclick="handleAction('telegram')" class="telegram-btn">
+                    <i class="fab fa-telegram-plane"></i> انضم لقناة المستثمرين
+                </button>
+            </div>
+            
+            <div class="glass-card settings-list">
+                <div class="setting-item" onclick="handleAction('settings')">
+                    <span><i class="fas fa-cog"></i> الإعدادات</span>
+                    <i class="fas fa-chevron-left"></i>
                 </div>
-                <button onclick="logout()" style="background:red; margin-top:20px;">خروج</button>
+                <div class="setting-item" onclick="handleAction('support')">
+                    <span><i class="fas fa-headset"></i> الدعم الفني</span>
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="setting-item logout" onclick="logout()">
+                    <span><i class="fas fa-sign-out-alt"></i> تسجيل خروج</span>
+                </div>
             </div>
         </section>
 
     </main>
 
-    <nav class="bottom-nav">
+    <nav class="bottom-nav glass-nav">
         <div class="nav-item" onclick="switchTab('profile')">
-            <i class="fas fa-user-clock"></i> <span>طلباتي</span>
+            <i class="fas fa-user"></i>
         </div>
         <div class="nav-item" onclick="switchTab('team')">
-            <i class="fas fa-users"></i> <span>الفريق</span>
+            <i class="fas fa-users"></i>
         </div>
-        <div class="nav-item active center-btn" onclick="switchTab('home')">
-            <div class="floating-home"><i class="fas fa-home"></i></div>
+        <div class="nav-item" onclick="switchTab('my-timers')">
+            <i class="fas fa-clock"></i>
         </div>
-        <div class="nav-item" onclick="switchTab('store')">
-            <i class="fas fa-shopping-cart"></i> <span>المتجر</span>
+        <div class="nav-item" onclick="switchTab('invest')">
+            <i class="fas fa-gem"></i>
         </div>
-        <div class="nav-item" onclick="switchTab('agents')">
-            <i class="fas fa-map-marker-alt"></i> <span>الوكلاء</span>
+        <div class="nav-item" onclick="switchTab('wallet')">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="nav-item active" onclick="switchTab('news')">
+            <i class="fas fa-newspaper"></i>
         </div>
     </nav>
 
-    <script>
-        // === تهيئة البيانات ===
-        let userData = JSON.parse(localStorage.getItem('keyInvestUser_v4')) || {
-            isRegistered: false,
-            name: '',
-            id: 'ID' + Math.floor(Math.random() * 100000),
-            balance: 0,
-            plans: []
-        };
-
-        // عند التحميل
-        document.addEventListener('DOMContentLoaded', () => {
-            checkLogin();
-            updateUI();
-        });
-
-        // === دالة التنقل بين التبويبات (الأهم) ===
-        function switchTab(tabId) {
-            console.log("Switching to:", tabId); // للتجربة
-
-            // 1. إخفاء كل التبويبات
-            const allTabs = document.querySelectorAll('.tab-content');
-            allTabs.forEach(tab => {
-                tab.style.display = 'none'; // ضمان الإخفاء عبر JS أيضاً
-                tab.classList.remove('active');
-            });
-
-            // 2. إظهار التبويب المطلوب
-            const selectedTab = document.getElementById(tabId);
-            if (selectedTab) {
-                selectedTab.style.display = 'block';
-                selectedTab.classList.add('active');
-            }
-
-            // 3. تحديث لون الأزرار
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-
-        // === باقي الوظائف ===
-        function checkLogin() {
-            const modal = document.getElementById('loginModal');
-            if (!userData.isRegistered) {
-                modal.style.display = 'flex';
-            } else {
-                modal.style.display = 'none';
-                document.getElementById('headerName').innerText = userData.name;
-                document.getElementById('userId').innerText = userData.id;
-            }
-        }
-
-        function registerUser() {
-            const name = document.getElementById('regName').value;
-            if (name.length < 3) return alert('ادخل اسماً صحيحاً');
-            userData.isRegistered = true;
-            userData.name = name;
-            saveData();
-            checkLogin();
-        }
-
-        function requestPlan(type, price) {
-            if(confirm('تأكيد طلب الاشتراك؟ سيتم مراجعته من الأدمن')) {
-                userData.plans.push({
-                    type: type,
-                    status: 'pending',
-                    date: new Date().toLocaleDateString()
-                });
-                saveData();
-                updateUI();
-                alert('تم ارسال الطلب بنجاح');
-                switchTab('profile'); // نقل المستخدم للبروفايل
-            }
-        }
-
-        function updateUI() {
-            const list = document.getElementById('myPlansList');
-            list.innerHTML = '';
-            if(userData.plans.length === 0) list.innerHTML = '<li>لا توجد اشتراكات</li>';
-            
-            userData.plans.forEach(plan => {
-                let statusTxt = plan.status === 'pending' ? 'قيد المراجعة ⏳' : 'نشط ✅';
-                let styleClass = plan.status === 'pending' ? 'pending' : 'active';
-                list.innerHTML += `
-                    <li class="req-item ${styleClass}">
-                        <span>${plan.type}</span>
-                        <span>${statusTxt}</span>
-                    </li>
-                `;
-            });
-        }
-
-        function logout() {
-            localStorage.removeItem('keyInvestUser_v4');
-            location.reload();
-        }
-
-        function saveData() {
-            localStorage.setItem('keyInvestUser_v4', JSON.stringify(userData));
-        }
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
