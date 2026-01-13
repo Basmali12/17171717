@@ -1,180 +1,292 @@
-// === تهيئة البيانات ===
-let userData = JSON.parse(localStorage.getItem('keyInvestUser_v3')) || {
-    isRegistered: false,
-    name: '',
-    phone: '',
-    id: 'ID' + Math.floor(Math.random() * 100000),
-    balance: 0, // الأرباح المتاحة
-    plans: [] // قائمة الاشتراكات
+// استيراد دوال Firebase (CDN)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// === 1. إعدادات الفايربيس (يجب استبدالها ببياناتك) ===
+const firebaseConfig = {
+    apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    authDomain: "your-app.firebaseapp.com",
+    projectId: "your-app",
+    storageBucket: "your-app.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
 };
 
-// === عند التحميل ===
+// تهيئة التطبيق
+let app, auth, provider;
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+} catch (e) {
+    console.error("Firebase Error: تأكد من وضع إعداداتك الصحيحة");
+}
+
+// === 2. المتغيرات العامة ===
+let currentUser = null;
+let isPreviewMode = false;
+let userLocalData = {
+    balance: 0,
+    activePlans: [], // { id, name, dailyProfit, nextClaimTime }
+    id: '---'
+};
+
+// === 3. تشغيل عند التحميل ===
 document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
-    updateUI();
+    runIntroAnimation();
     
-    // أنميشن بسيط
-    gsap.from(".plans-container", {y: 30, opacity: 0, duration: 0.8, delay: 0.2});
-});
-
-// === 1. التسجيل ===
-function checkLogin() {
-    const modal = document.getElementById('loginModal');
-    if (!userData.isRegistered) {
-        modal.style.display = 'flex';
-    } else {
-        modal.style.display = 'none';
-        document.getElementById('headerName').innerText = userData.name;
-        document.getElementById('userId').innerText = userData.id;
-    }
-}
-
-function registerUser() {
-    const name = document.getElementById('regName').value;
-    const phone = document.getElementById('regPhone').value;
-
-    if (name.length < 3 || phone.length < 10) return alert('يرجى إدخال بيانات صحيحة');
-
-    userData.isRegistered = true;
-    userData.name = name;
-    userData.phone = phone;
-    saveData();
-    checkLogin();
-}
-
-function logout() {
-    if(confirm('تسجيل خروج؟')) {
-        localStorage.removeItem('keyInvestUser_v3');
-        location.reload();
-    }
-}
-
-// === 2. نظام الباقات (طلب الاشتراك) ===
-function requestPlan(type, price) {
-    // محاكاة لطلب الاشتراك - يذهب للأدمن (حالة قيد المراجعة)
-    
-    // التحقق اذا كان لديه طلب قيد المراجعة لنفس الباقة
-    const hasPending = userData.plans.some(p => p.type === type && p.status === 'pending');
-    if(hasPending) {
-        return alert('لديك طلب اشتراك قيد المراجعة لهذه الباقة مسبقاً.');
-    }
-
-    if(confirm(`هل أنت متأكد من تقديم طلب اشتراك في باقة ${price.toLocaleString()} IQD؟\nسيقوم الأدمن بمراجعة الطلب وتفعيله.`)) {
-        
-        const newPlan = {
-            id: Date.now(),
-            type: type,
-            price: price,
-            status: 'pending', // الحالة الافتراضية: قيد المراجعة
-            requestDate: new Date().toLocaleDateString(),
-            startDate: null, // يتحدد عند التفعيل
-            endDate: null // يتحدد عند التفعيل (بعد 4 شهور)
-        };
-
-        userData.plans.push(newPlan);
-        saveData();
-        updateUI();
-        
-        // الانتقال لصفحة الطلبات لرؤية الحالة
-        switchTab('profile');
-        alert('✅ تم إرسال طلب الاشتراك بنجاح!\nالحالة الحالية: قيد المراجعة من قبل الأدمن.');
-    }
-}
-
-// === 3. تحديث الواجهة ===
-function updateUI() {
-    // تحديث الرصيد (محاكاة للأرباح)
-    document.getElementById('walletBalance').innerText = userData.balance.toLocaleString() + ' IQD';
-    
-    // تحديث قائمة الاشتراكات في البروفايل
-    const list = document.getElementById('myPlansList');
-    list.innerHTML = '';
-    
-    let activeCount = 0;
-    let pendingCount = 0;
-
-    if(userData.plans.length === 0) {
-        list.innerHTML = '<li style="text-align:center; color:#999; padding:10px;">لا توجد اشتراكات بعد</li>';
-    } else {
-        userData.plans.forEach(plan => {
-            let statusText = '';
-            let statusClass = '';
-
-            if(plan.status === 'pending') {
-                statusText = '⏳ قيد المراجعة';
-                statusClass = 'pending';
-                pendingCount++;
-            } else if (plan.status === 'active') {
-                statusText = '✅ نشط';
-                statusClass = 'active';
-                activeCount++;
+    // مراقب حالة تسجيل الدخول
+    if(auth) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loginSuccess(user);
             } else {
-                statusText = '❌ مرفوض/منتهي';
-                statusClass = '';
+                if(!isPreviewMode) showLoginModal();
             }
-
-            // اسم الباقة للعرض
-            let planName = plan.type === 'starter' ? 'باقة 100 ألف' : (plan.type === 'pro' ? 'باقة 500 ألف' : 'باقة VIP');
-
-            list.innerHTML += `
-                <li class="req-item ${statusClass}">
-                    <div>
-                        <strong>${planName}</strong>
-                        <div style="font-size:0.8rem; color:#777">${plan.requestDate}</div>
-                    </div>
-                    <div class="status-txt ${statusClass}">${statusText}</div>
-                </li>
-            `;
         });
     }
 
-    document.getElementById('activePlansCount').innerText = activeCount;
-    document.getElementById('pendingPlansCount').innerText = pendingCount;
+    // تهيئة الزر
+    document.getElementById('googleLoginBtn').addEventListener('click', googleLogin);
+    
+    // بدء تحديث العدادات كل ثانية
+    setInterval(updateTimersUI, 1000);
+});
+
+// === 4. انميشن المقدمة ===
+function runIntroAnimation() {
+    // تقليب الأحرف
+    var textWrapper = document.querySelector('.ml11 .letters');
+    textWrapper.innerHTML = textWrapper.textContent.replace(/([^\x00-\x80]|\w)/g, "<span class='letter'>$&</span>");
+
+    anime.timeline({loop: false})
+    .add({
+        targets: '.ml11 .line',
+        scaleY: [0,1],
+        opacity: [0.5,1],
+        easing: "easeOutExpo",
+        duration: 700
+    })
+    .add({
+        targets: '.ml11 .line',
+        translateX: [0, document.querySelector('.ml11 .letters').getBoundingClientRect().width + 10],
+        easing: "easeOutExpo",
+        duration: 700,
+        delay: 100
+    }).add({
+        targets: '.ml11 .letter',
+        opacity: [0,1],
+        easing: "easeOutExpo",
+        duration: 600,
+        offset: '-=775',
+        delay: (el, i) => 34 * (i+1)
+    }).add({
+        targets: '#intro-overlay',
+        opacity: 0,
+        duration: 1000,
+        delay: 1000,
+        complete: function(anim) {
+            document.getElementById('intro-overlay').style.display = 'none';
+        }
+    });
 }
 
-// === 4. التنقل ===
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    
-    const target = document.getElementById(tabId);
-    if(target) {
-        target.classList.add('active');
-        // Animation
-        gsap.fromTo(target, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
-    }
+// === 5. وظائف الدخول ===
+window.googleLogin = () => {
+    signInWithPopup(auth, provider)
+    .then((result) => {
+        // تم الدخول
+    }).catch((error) => {
+        alert("خطأ في التسجيل: " + error.message);
+    });
+};
 
-    // تحديث الأزرار
+window.startGuestMode = () => {
+    isPreviewMode = true;
+    document.getElementById('authModal').style.display = 'none';
+    document.getElementById('userName').innerText = 'زائر (معاينة)';
+    document.getElementById('userId').innerText = 'GUEST-' + Math.floor(Math.random()*1000);
+    loadFakeHistory(); // تحميل بيانات وهمية للعرض فقط
+};
+
+function showLoginModal() {
+    document.getElementById('authModal').style.display = 'flex';
+}
+
+function loginSuccess(user) {
+    document.getElementById('authModal').style.display = 'none';
+    document.getElementById('userName').innerText = user.displayName;
+    // إنشاء ID ثابت تقريباً من UID
+    let shortId = user.uid.substring(0, 8).toUpperCase();
+    document.getElementById('userId').innerText = shortId;
+    userLocalData.id = shortId;
+    
+    // استرجاع البيانات المحلية (محاكاة قاعدة بيانات)
+    const saved = localStorage.getItem(`keyInvest_${user.uid}`);
+    if(saved) userLocalData = JSON.parse(saved);
+    
+    updateWalletUI();
+    renderActiveTimers();
+    loadFakeHistory();
+}
+
+window.logout = () => {
+    if(isPreviewMode) {
+        location.reload();
+    } else {
+        signOut(auth).then(() => location.reload());
+    }
+};
+
+// === 6. إدارة التبويبات ===
+window.switchTab = (tabId) => {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
-    // تحديد الزر النشط يدوياً بناءً على التبويب
-    if(tabId === 'home') document.querySelectorAll('.nav-item')[2].classList.add('active');
-    if(tabId === 'store') document.querySelectorAll('.nav-item')[3].classList.add('active');
-    if(tabId === 'profile') document.querySelectorAll('.nav-item')[0].classList.add('active');
-    if(tabId === 'team') document.querySelectorAll('.nav-item')[1].classList.add('active');
-    if(tabId === 'agents') document.querySelectorAll('.nav-item')[4].classList.add('active');
-}
-
-// === تخزين البيانات ===
-function saveData() {
-    localStorage.setItem('keyInvestUser_v3', JSON.stringify(userData));
-}
-
-// === (خاص بالمبرمج) محاكاة تفعيل الأدمن ===
-// يمكنك استدعاء هذه الدالة من الكونسول لتجربة تفعيل اشتراك: adminActivatePlan()
-function adminActivatePlan() {
-    if(userData.plans.length > 0) {
-        userData.plans[0].status = 'active';
-        userData.plans[0].startDate = new Date().toLocaleDateString();
-        // اضافة 4 شهور
-        let end = new Date();
-        end.setMonth(end.getMonth() + 4);
-        userData.plans[0].endDate = end.toLocaleDateString();
-        
-        saveData();
-        updateUI();
-        console.log('تم تفعيل أول باقة بنجاح للمحاكاة');
-        alert('Admin Action: تم تفعيل الباقة (محاكاة)');
-    } else {
-        console.log('لا توجد باقات');
+    document.getElementById(tabId).classList.add('active');
+    
+    // تحديد الزر النشط
+    const navIndex = ['profile', 'team', 'my-timers', 'invest', 'wallet', 'news'].indexOf(tabId);
+    if(navIndex !== -1) {
+        document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
     }
+};
+
+// === 7. نظام الإجراءات (المنع للمعاينة) ===
+window.handleAction = (action) => {
+    if(isPreviewMode) {
+        alert('⚠️ هذه الميزة متاحة للأعضاء المسجلين فقط.\nأنت حالياً في وضع المعاينة.');
+        return;
+    }
+
+    if(action === 'deposit') {
+        window.location.href = 'https://t.me/am_an12';
+    } else if (action === 'withdraw') {
+        const amount = prompt("أدخل المبلغ المراد سحبه (IQD):");
+        if(amount) alert("تم إرسال طلب السحب للمراجعة.");
+    } else if (action === 'telegram') {
+        window.location.href = 'https://t.me/keey10';
+    } else if (action === 'copy') {
+        navigator.clipboard.writeText(`https://key-invest.app/?ref=${userLocalData.id}`);
+        alert("تم نسخ رابط الدعوة");
+    } else {
+        alert("قريباً...");
+    }
+};
+
+// === 8. نظام الاستثمار والعدادات ===
+window.buyPlan = (type, price, dailyProfit) => {
+    if(isPreviewMode) return window.handleAction('buy');
+
+    if(confirm(`تأكيد شراء باقة بقيمة ${price}؟\n(سيتم خصم المبلغ من رصيدك في النسخة الكاملة)`)) {
+        const newPlan = {
+            id: Date.now(),
+            name: type === 'starter' ? 'الباقة الأساسية' : 'الباقة الذهبية',
+            dailyProfit: dailyProfit,
+            startTime: Date.now(),
+            nextClaimTime: Date.now() + (24 * 60 * 60 * 1000) // بعد 24 ساعة
+        };
+        
+        userLocalData.activePlans.push(newPlan);
+        saveUserData();
+        alert('✅ تم تفعيل الباقة وبدأ العداد!');
+        switchTab('my-timers');
+        renderActiveTimers();
+    }
+};
+
+function renderActiveTimers() {
+    const container = document.getElementById('activeTimersList');
+    container.innerHTML = '';
+
+    if(userLocalData.activePlans.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#eee; margin-top:20px;">لا توجد استثمارات نشطة</p>';
+        return;
+    }
+
+    userLocalData.activePlans.forEach((plan, index) => {
+        container.innerHTML += `
+            <div class="timer-item" id="plan-${plan.id}">
+                <div>
+                    <strong>${plan.name}</strong>
+                    <div style="font-size:0.8rem; opacity:0.7">ربح: ${plan.dailyProfit} IQD</div>
+                </div>
+                <div style="text-align:left">
+                    <div class="timer-count" id="timer-${plan.id}">--:--:--</div>
+                    <button class="btn-claim" id="btn-${plan.id}" onclick="claimProfit(${index})">استلام الأرباح 💰</button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function updateTimersUI() {
+    const now = Date.now();
+    userLocalData.activePlans.forEach(plan => {
+        const diff = plan.nextClaimTime - now;
+        const timerElement = document.getElementById(`timer-${plan.id}`);
+        const btnElement = document.getElementById(`btn-${plan.id}`);
+        
+        if(timerElement && btnElement) {
+            if(diff <= 0) {
+                timerElement.style.display = 'none';
+                btnElement.style.display = 'block';
+            } else {
+                timerElement.style.display = 'block';
+                btnElement.style.display = 'none';
+                
+                // تحويل الوقت
+                let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                let s = Math.floor((diff % (1000 * 60)) / 1000);
+                timerElement.innerText = `${h}h ${m}m ${s}s`;
+            }
+        }
+    });
+}
+
+window.claimProfit = (index) => {
+    const plan = userLocalData.activePlans[index];
+    userLocalData.balance += plan.dailyProfit;
+    
+    // إعادة تعيين العداد 24 ساعة
+    plan.nextClaimTime = Date.now() + (24 * 60 * 60 * 1000);
+    
+    saveUserData();
+    updateWalletUI();
+    renderActiveTimers(); // لإخفاء الزر وإظهار العداد
+    alert(`💵 تم إضافة ${plan.dailyProfit} IQD إلى محفظتك!`);
+};
+
+function updateWalletUI() {
+    document.getElementById('totalBalance').innerText = userLocalData.balance.toLocaleString() + ' IQD';
+}
+
+function saveUserData() {
+    if(currentUser) {
+        localStorage.setItem(`keyInvest_${currentUser.uid}`, JSON.stringify(userLocalData));
+    }
+}
+
+// === 9. سحوبات وهمية ===
+function loadFakeHistory() {
+    const historyList = document.getElementById('withdrawalHistory');
+    historyList.innerHTML = '';
+    
+    const fakeData = [
+        { amount: 50000, date: '2025/01/10', status: '✅ تم التحويل' },
+        { amount: 25000, date: '2025/01/05', status: '✅ تم التحويل' },
+        { amount: 100000, date: '2024/12/28', status: '✅ تم التحويل' },
+        { amount: 15000, date: '2024/12/15', status: '✅ تم التحويل' }
+    ];
+
+    fakeData.forEach(item => {
+        historyList.innerHTML += `
+            <li class="history-item">
+                <span><i class="fas fa-arrow-up" style="color:red; margin-left:5px;"></i> سحب ${item.amount.toLocaleString()}</span>
+                <span style="opacity:0.7; font-size:0.8rem">${item.date}</span>
+            </li>
+        `;
+    });
 }
